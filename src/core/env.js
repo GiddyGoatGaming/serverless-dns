@@ -116,7 +116,7 @@ const defaults = new Map(
     // primary doh upstream
     CF_DNS_RESOLVER_URL: {
       type: "string",
-      default: "tls://security.cloudflare-dns.com/dns-query",
+      default: "quic://p1.freedns.controld.com/dns-query",
     },
     // secondary doh upstream
     CF_DNS_RESOLVER_URL_2: {

@@ -126,7 +126,7 @@ const defaults = new Map(
     // tertiary doh upstream
     CF_DNS_RESOLVER_URL_3: {
       type: "string",
-      default: "",
+      default: "tls://security.cloudflare-dns.com/dns-query",
     },
     // upstream recursive rethinkdns resolver running on Fly.io
     MAX_DNS_RESOLVER_URL: {

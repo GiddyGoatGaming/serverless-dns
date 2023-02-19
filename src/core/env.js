@@ -116,17 +116,17 @@ const defaults = new Map(
     // primary doh upstream
     CF_DNS_RESOLVER_URL: {
       type: "string",
-      default: "https://freedns.controld.com/p1",
+      default: "h3://freedns.controld.com/p1",
     },
     // secondary doh upstream
     CF_DNS_RESOLVER_URL_2: {
       type: "string",
-      default: "https://dns.nextdns.io/",
+      default: "h3://dns.nextdns.io/dns-query",
     },
     // tertiary doh upstream
     CF_DNS_RESOLVER_URL_3: {
       type: "string",
-      default: "https://security.cloudflare-dns.com/dns-query",
+      default: "h3://security.cloudflare-dns.com/dns-query",
     },
     // upstream recursive rethinkdns resolver running on Fly.io
     MAX_DNS_RESOLVER_URL: {

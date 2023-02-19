@@ -121,12 +121,12 @@ const defaults = new Map(
     // secondary doh upstream
     CF_DNS_RESOLVER_URL_2: {
       type: "string",
-      default: "h3://dns.nextdns.io/c556eb",
+      default: "h3://dns.google/dns-query",
     },
     // tertiary doh upstream
     CF_DNS_RESOLVER_URL_3: {
       type: "string",
-      default: "h3://c556eb.dns.nextdns.io",
+      default: "http://doh3.dns.nextdns.io/",
     },
     // upstream recursive rethinkdns resolver running on Fly.io
     MAX_DNS_RESOLVER_URL: {

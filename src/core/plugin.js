@@ -12,8 +12,6 @@ import * as dnsutil from "../commons/dnsutil.js";
 import * as envutil from "../commons/envutil.js";
 import * as rdnsutil from "../plugins/rdns-util.js";
 import * as util from "../commons/util.js";
-import IOState from "./io-state.js";
-import { RResp } from "../plugins/plugin-response.js";
 
 export default class RethinkPlugin {
   /**

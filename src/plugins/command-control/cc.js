@@ -12,10 +12,6 @@ import * as dnsutil from "../../commons/dnsutil.js";
 import * as pres from "../plugin-response.js";
 import { flagsToTags, tagsToFlags } from "@serverless-dns/trie/stamp.js";
 import * as token from "../users/auth-token.js";
-import { BlocklistFilter } from "../rethinkdns/filter.js";
-import { LogPusher } from "../observability/log-pusher.js";
-import { BlocklistWrapper } from "../rethinkdns/main.js";
-import { DNSResolver } from "../dns-op/dns-op.js";
 
 export class CommandControl {
   constructor(blocklistWrapper, resolver, logPusher) {

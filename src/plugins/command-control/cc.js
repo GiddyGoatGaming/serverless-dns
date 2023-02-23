@@ -148,7 +148,7 @@ export class CommandControl {
         response.data.httpResponse = domainNameToUint(
           this.resolver,
           queryString,
-          blf
+        function domainNameToUint(blf) {
         );
       } else if (command === "search") {
         // redirect to the search page with blockstamp (b64) preloaded

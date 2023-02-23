@@ -148,7 +148,7 @@ const defaults = new Map(
     // ttl for dns answers, overrides ttls in dns answers
     CACHE_TTL: {
       type: "number",
-      default: "86400", // 30m
+      default: "86400", // 1d
     },
     // disable downloading blocklists altogether
     DISABLE_BLOCKLISTS: {

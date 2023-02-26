@@ -10,7 +10,7 @@ import * as util from "../commons/util.js";
 import * as dnsutil from "../commons/dnsutil.js";
 import * as envutil from "../commons/envutil.js";
 
-const minTtlSec = 300; // 5m
+const minTtlSec = 900; // 15m
 const maxTtlSec = 86400; // 1d
 const cheader = "x-rdnscache-metadata";
 const _cacheurl = "https://caches.rethinkdns.com/";

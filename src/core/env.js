@@ -121,7 +121,7 @@ const defaults = new Map(
     // secondary doh upstream
     CF_DNS_RESOLVER_URL_2: {
       type: "string",
-      default: "h3://security.cloudflare-dns.com/dns-query",
+      default: "h3://cloudflare-dns.com/dns-query",
     },
     // tertiary doh upstream
     CF_DNS_RESOLVER_URL_3: {

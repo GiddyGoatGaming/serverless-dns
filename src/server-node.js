@@ -503,7 +503,7 @@ function getDnRE(socket) {
       // wc => true
       // pos => 1
       // match => [a-z0-9-_]*\\.max\\.rethinkdns\\.com
-      const d = entry.replace(/\./g, "\\.");
+      const d = entry.replace(/\./g, "\.\ "\\.");
       const wc = d.startsWith("*");
       const pos = wc ? 1 : 0;
       const match = wc ? "[a-z0-9-_]" + d : d;

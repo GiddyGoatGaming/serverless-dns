@@ -51,6 +51,7 @@ routes = [
 LOG_LEVEL = "info"
 WORKER_ENV = "production"
 CLOUD_PLATFORM = "cloudflare"
+CACHE_TTL = "86400"
 
 ##################
 #------ONE-------#

@@ -82,7 +82,7 @@ do
         if [ $wcode -eq 0 ]; then
             # baretimestamp=$(cut -d"," -f9 "$out" | cut -d":" -f2 | grep -o -E '[0-9]+' | tail -n1)
             fulltimestamp=$(cut -d"," -f9 "$out" | cut -d":" -f2 | tr -dc '0-9/')
-            if [ $(hasfwslash "$fulltimestamp") = "no" ]; then
+            if [ "$(hasfwslash "$fulltimestamp")" = "no" ]; then
                 echo "==x= pre.sh: $i filetag at f8"
                 fulltimestamp=$(cut -d"," -f8 "$out" | cut -d":" -f2 | tr -dc '0-9/')
             fi

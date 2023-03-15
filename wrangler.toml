@@ -5,8 +5,8 @@ workers_dev = true
 logpush = false
 # use node_compat or custom build
 # node_compat = true
-compatibility_date = "2023-03-14"
-compatibility_flags = [ "tcp_sockets_support", "experimental", "web_socket_compression" ]
+compatibility_date = "2023-03-07"
+compatibility_flags = [ "web_socket_compression" ]
 send_metrics = false
 minify = false
 

@@ -6,6 +6,7 @@ logpush = false
 # use node_compat or custom build
 # node_compat = true
 compatibility_date = "2023-03-14"
+compatibility_flags = [ "tcp_sockets_support" ]
 send_metrics = false
 minify = false
 

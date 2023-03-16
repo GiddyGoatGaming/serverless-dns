@@ -10,6 +10,7 @@ import * as util from "../commons/util.js";
 import * as dnsutil from "../commons/dnsutil.js";
 import * as envutil from "../commons/envutil.js";
 
+/*eslint-env es6*/
 const minTtlSec = 3600; // 1h
 const maxTtlSec = 86400; // 1d
 const cheader = "x-rdnscache-metadata";

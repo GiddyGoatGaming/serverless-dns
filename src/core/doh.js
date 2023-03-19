@@ -11,6 +11,7 @@ import * as pres from "../plugins/plugin-response.js";
 import * as util from "../commons/util.js";
 import * as dnsutil from "../commons/dnsutil.js";
 import IOState from "./io-state.js";
+import rateLimiter from "./rate-limiter.js";
 
 /**
  * @param {FetchEvent} event
@@ -31,6 +32,7 @@ async function proxyRequest(event) {
   const ua = event.request.headers.get("User-Agent");
 
   try {
+    await rateLimiter.middleware(event.request);
     const plugin = new RethinkPlugin(event);
     await plugin.initIoState(io);
 
@@ -49,19 +51,7 @@ async function proxyRequest(event) {
     errorResponse(io, err);
   }
 
+  rateLimiter.incrementToken();
   return withCors(io, ua);
 }
 
-function optionsRequest(request) {
-  return request.method === "OPTIONS";
-}
-
-function errorResponse(io, err = null) {
-  const eres = pres.errResponse("doh.js", err);
-  io.dnsExceptionResponse(eres);
-}
-
-function withCors(io, ua) {
-  if (util.fromBrowser(ua)) io.setCorsHeadersIfNeeded();
-  return io.httpResponse;
-}

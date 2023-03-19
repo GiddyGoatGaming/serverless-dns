@@ -18,7 +18,7 @@ export default {
 };
 
 async function handleDohRequest(request, env, context) {
-  system.publish("prepare", { env });
+  system.pub("prepare", { env });
 
   const fetchEvent = util.mkFetchEvent(
     request,

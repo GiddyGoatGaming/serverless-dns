@@ -6,22 +6,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-// rate-limiter.js
-
-const TOKEN_BUCKET_CAPACITY = 300;
-const TOKEN_FILL_RATE = 30; // tokens per second
+const RATE_LIMIT_CAPACITY = 300; // max amount of requests at once. Only used if over 30 requests a sec
+const RATE_LIMIT_FILL_RATE = 30; // max amount of requests that can be processed a sec before going to RATE_LIMIT_CAPACITY
 
 class RateLimiter {
   constructor() {
     this.bucket = {
-      capacity: TOKEN_BUCKET_CAPACITY,
-      tokens: TOKEN_BUCKET_CAPACITY,
+      capacity: RATE_LIMIT_CAPACITY,
+      tokens: RATE_LIMIT_CAPACITY,
     };
     setInterval(() => {
       if (this.bucket.tokens < this.bucket.capacity) {
-        this.bucket.tokens += TOKEN_FILL_RATE;
+        this.bucket.tokens += RATE_LIMIT_FILL_RATE;
       }
-    }, 1000 / TOKEN_FILL_RATE);
+    }, 1000 / RATE_LIMIT_FILL_RATE);
   }
 
   async middleware(request) {

@@ -55,8 +55,8 @@ async function proxyRequest(event) {
   }
 
   return withCors(io, ua);
-
 }
+
 function optionsRequest(request) {
   return request.method === "OPTIONS";
 }

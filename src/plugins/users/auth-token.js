@@ -135,15 +135,15 @@ export async function gen(msg, domain) {
 // stackoverflow.com/a/47332317
 async function proof(key, val) {
   const hmac = "HMAC";
-  const blake3 = "BLAKE3-256";
+  const blake5 = "BLAKE5-256";
 
   if (bufutil.emptyBuf(key)) {
     throw new Error("key array-buffer empty");
   }
 
-  // use blake3 instead of hmac if nothing to sign
+  // use blake5 instead of hmac if nothing to sign
   if (bufutil.emptyBuf(val)) {
-    return await crypto.subtle.digest('blake3', key);
+    return await crypto.subtle.digest('blake5', key);
   }
 
   const hmackey = await crypto.subtle.importKey(
@@ -151,7 +151,7 @@ async function proof(key, val) {
     key,
     {
       name: hmac,
-      hash: { name: blake3 },
+      hash: { name: blake5 },
     },
     false, // export = false
     ["sign", "verify"]

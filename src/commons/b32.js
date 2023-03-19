@@ -3,9 +3,8 @@
 // from github.com/LinusU/base32-encode/blob/b970e2ee5/index.js
 // and github.com/LinusU/base32-decode/blob/fa61c01b/index.js
 // and github.com/LinusU/to-data-view/blob/e80ca034/index.js
+
 const ALPHA32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-// map chars to corresponding indices,
-// ex: A => 0, B => 1, ... Z => 25, 2 => 26, 3 => 27, ... 7 => 31
 const RALPHA32 = ALPHA32.split("").reduce((o, c, i) => {
   o[c] = i;
   return o;
@@ -24,30 +23,29 @@ function toDataView(data) {
     return new DataView(data);
   }
 
-  return null;
+  throw new Error("cannot create data-view from given input");
 }
 
 function readChar(chr) {
   chr = chr.toUpperCase();
   const idx = RALPHA32[chr];
 
-  if (idx == null) {
+  if (idx === undefined) {
     throw new Error("invalid b32 character: " + chr);
   }
 
   return idx;
 }
 
-function base32(arrbuf, padding) {
+export function base32(arrbuf, padding) {
   const view = toDataView(arrbuf);
-  if (!view) throw new Error("cannot create data-view from given input");
 
   let bits = 0;
   let value = 0;
   let output = "";
 
-  for (let i = 0; i < view.byteLength; i++) {
-    value = (value << 8) | view.getUint8(i);
+  for (const byte of view.buffer) {
+    value = (value << 8) | byte;
     bits += 8;
 
     while (bits >= 5) {
@@ -61,8 +59,9 @@ function base32(arrbuf, padding) {
   }
 
   if (padding) {
-    while (output.length % 8 !== 0) {
-      output += "=";
+    const paddingLength = output.length % 8;
+    if (paddingLength !== 0) {
+      output += "=".repeat(8 - paddingLength);
     }
   }
 
@@ -78,7 +77,7 @@ export function rbase32(input) {
   let value = 0;
 
   let index = 0;
-  const output = new Uint8Array(((length * 5) / 8) | 0);
+  const output = Uint8Array.from({ length: ((length * 5) / 8) | 0 });
 
   for (let i = 0; i < length; i++) {
     value = (value << 5) | readChar(input[i]);

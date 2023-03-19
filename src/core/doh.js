@@ -53,7 +53,6 @@ async function proxyRequest(event) {
 
     rateLimiter.incrementToken();
   }
-
   return withCors(io, ua);
 }
 

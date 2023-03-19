@@ -17,8 +17,6 @@ import { services } from "../svc.js";
 
 // on Workers, setup is called for every new request,
 // since server-workers.js fires "prepare" on every request
-function prep(arg) {
-  // if this file execs... assume we're on workers.
 async function prep(arg) {
   if (!arg) throw new Error("are we on workers?");
   if (!arg.env) throw new Error("workers cannot be setup with empty env");

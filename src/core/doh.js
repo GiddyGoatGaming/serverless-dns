@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 RethinkDNS and its authors.
+ * Copyright (c) 2023 RethinkDNS and its authors.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -51,8 +51,7 @@ async function proxyRequest(event) {
     errorResponse(io, err);
   }
 
-    rateLimiter.incrementToken();
-  }
+  rateLimiter.incrementToken();
   return withCors(io, ua);
 }
 

@@ -51,6 +51,21 @@ async function proxyRequest(event) {
     errorResponse(io, err);
   }
 
-  rateLimiter.incrementToken();
+    rateLimiter.incrementToken();
+  }
+
   return withCors(io, ua);
+}
+function optionsRequest(request) {
+  return request.method === "OPTIONS";
+}
+
+function errorResponse(io, err = null) {
+  const eres = pres.errResponse("doh.js", err);
+  io.dnsExceptionResponse(eres);
+}
+
+function withCors(io, ua) {
+  if (util.fromBrowser(ua)) io.setCorsHeadersIfNeeded();
+  return io.httpResponse;
 }

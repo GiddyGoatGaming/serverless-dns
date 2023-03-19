@@ -143,7 +143,7 @@ async function proof(key, val) {
 
   // use BLAKE2B-256 instead of hmac if nothing to sign
   if (bufutil.emptyBuf(val)) {
-    return await crypto.subtle.digest(, key);
+    return await crypto.subtle.digest('BLAKE2B-256', key);
   }
 
   const hmackey = await crypto.subtle.importKey(

@@ -7,7 +7,7 @@ logpush = false
 # node_compat = true
 compatibility_date = "2023-03-07"
 send_metrics = false
-minify = true
+minify = false
 
 # uncomment to enable analytics on serverless-dns
 # this binding is not inherited by other worker-envs

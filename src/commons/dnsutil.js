@@ -13,38 +13,31 @@ import * as bufutil from "./bufutil.js";
 
 // dns packet constants (in bytes)
 // tcp msgs prefixed with 2-octet headers indicating request len in bytes
-export const dnsHeaderSize = 2;
-export const dnsPacketHeaderSize = 12;
-export const minDNSPacketSize = dnsPacketHeaderSize + 5;
-export const maxDNSPacketSize = 4096;
-
-// TODO: move _dns* related settings to env
-const _dnsCloudflareSec4 = "1.1.1.2";
-const _dnsFly6 = "fdaa::3";
-const _dnsCacheSize = 30000;
-
-const _minRequestTimeout = 4000; // 4s
-const _maxRequestTimeout = 30000; // 30s
+const DNS_HEADER_SIZE = 2;
+const DNS_PACKET_HEADER_SIZE = 12;
+const MIN_DNS_PACKET_SIZE = DNS_PACKET_HEADER_SIZE + 5;
+const MAX_DNS_PACKET_SIZE = 4096;
+const DNS_CLOUDFLARE_SEC4 = "1.1.1.2";
+const DNS_FLY6 = "fdaa::3";
+const DNS_CACHE_SIZE = 30000;
+const MIN_REQUEST_TIMEOUT = 4000; // 4s
+const MAX_REQUEST_TIMEOUT = 30000; // 30s
 
 export function dnsaddr() {
   // flydns is always ipv6 (fdaa::53)
-  if (envutil.recursive()) return _dnsFly6;
-  return _dnsCloudflareSec4;
+  return envutil.recursive() ? DNS_FLY6 : DNS_CLOUDFLARE_SEC4;
 }
 
 export function cacheSize() {
-  return _dnsCacheSize;
+  return DNS_CACHE_SIZE;
 }
 
 export function isAnswer(packet) {
-  if (util.emptyObj(packet)) return false;
-
-  return packet.type === "response";
+  return packet && packet.type === "response";
 }
 
 export function mkQ(qid, qs) {
-  if (util.emptyArray(qs)) return null;
-
+  if (!qs.length) return null;
   return dnslib.encode({
     id: qid || 0,
     type: "query",
@@ -53,9 +46,7 @@ export function mkQ(qid, qs) {
 }
 
 export function servfail(qid, qs) {
-  // qid == 0 is valid; in fact qid is set to 0 by most doh clients
-  if (qid == null || qid < 0 || util.emptyArray(qs)) return null;
-
+  if (!qid || qid < 0 || !qs.length) return null;
   return encode({
     id: qid,
     type: "response",
@@ -65,8 +56,7 @@ export function servfail(qid, qs) {
 }
 
 export function servfailQ(q) {
-  if (bufutil.emptyBuf(q)) return null;
-
+  if (!q.length) return null;
   try {
     const p = decode(q);
     return servfail(p.id, p.questions);
@@ -77,45 +67,34 @@ export function servfailQ(q) {
 
 export function requestTimeout() {
   const t = envutil.workersTimeout();
-  return t > _minRequestTimeout
-    ? Math.min(t, _maxRequestTimeout)
-    : _minRequestTimeout;
+  return t > MIN_REQUEST_TIMEOUT ? Math.min(t, MAX_REQUEST_TIMEOUT) : MIN_REQUEST_TIMEOUT;
 }
 
 export function truncated(ans) {
-  if (bufutil.emptyBuf(ans)) return false;
-  if (ans.byteLength < dnsPacketHeaderSize) return false;
-  // first 2 bytes are query-id
-  const flags = ans.readUInt16BE(2);
-  // github.com/mafintosh/dns-packet/blob/8e6d91c0/index.js#L147
+  if (!ans || ans.length < DNS_PACKET_HEADER_SIZE) return false;
+  const flags = ans.readUInt16BE(DNS_HEADER_SIZE);
   const tc = (flags >> 9) & 0x1;
   return tc === 1;
 }
 
 export function validResponseSize(r) {
-  return r && validateSize(r.byteLength);
+  return r && validateSize(r.length);
 }
 
 export function validateSize(sz) {
-  return sz >= minDNSPacketSize && sz <= maxDNSPacketSize;
+  return sz >= MIN_DNS_PACKET_SIZE && sz <= MAX_DNS_PACKET_SIZE;
 }
 
 export function hasAnswers(packet) {
-  return !util.emptyObj(packet) && !util.emptyArray(packet.answers);
+  return packet && packet.answers && packet.answers.length > 0;
 }
 
 export function hasSingleQuestion(packet) {
-  return (
-    !util.emptyObj(packet) &&
-    !util.emptyArray(packet.questions) &&
-    packet.questions.length === 1
-  );
+  return packet && packet.questions && packet.questions.length === 1;
 }
 
 export function rcodeNoError(packet) {
-  if (util.emptyObj(packet)) return false;
-  // github.com/mafintosh/dns-packet/blob/8e6d91c07/rcodes.js
-  return packet.rcode === "NOERROR";
+  return packet && packet.rcode === "NOERROR";
 }
 
 export function hasDnssecOk(packet) {
@@ -480,8 +459,8 @@ export function getInterestingAnswerData(packet, maxlen = 80, delim = "|") {
 
 export function dohStatusCode(b) {
   if (!b || !b.byteLength) return 412;
-  if (b.byteLength > maxDNSPacketSize) return 413;
-  if (b.byteLength < minDNSPacketSize) return 400;
+  if (b.byteLength > MAX_DNS_PACKET_SIZE) return 413;
+  if (b.byteLength < MIN_DNS_PACKET_SIZE) return 400;
   return 200;
 }
 

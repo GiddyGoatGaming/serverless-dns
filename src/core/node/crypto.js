@@ -9,6 +9,6 @@
 import { createHash } from "crypto";
 import { normalize8 } from "./bufutil.js";
 
-export function blake3(b) {
-  return createHash("blake3", { digestLength: 32 }).update(normalize8(b)).digest("hex");
+export function blake2b(b) {
+  return createHash("blake2b", { digestLength: 32 }).update(normalize8(b)).digest("hex");
 }

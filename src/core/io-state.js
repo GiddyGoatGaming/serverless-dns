@@ -104,56 +104,66 @@ export default class IOState {
    * @param {ArrayBuffer} arrayBuffer - responseBodyBuffer
    * @returns Web API Response
    */
-  dnsResponse(arrayBuffer, dnsPacket = null, blockflag = null) {
-    if (bufutil.emptyBuf(arrayBuffer)) {
-      return;
+dnsResponse(arrayBuffer, dnsPacket = null, blockflag = null) {
+  if (bufutil.emptyBuf(arrayBuffer)) {
+    return;
+  }
+
+  this.stopProcessing = true;
+  this.flag = blockflag || "";
+
+  // gw responses only assigned on A/AAAA/HTTPS/SVCB records
+  // TODO: ALT-SVC records
+  const isGwAns = this.assignGatewayResponseIfNeeded();
+  if (isGwAns) {
+    // overwrite the existing packet (raw) as in the new decoded-packed
+    arrayBuffer = dnsutil.encode(this.decodedDnsPacket);
+  } else {
+    // overwrite the existing packet (decoded) as in the sent array-buffer
+    this.decodedDnsPacket = dnsPacket || dnsutil.decode(arrayBuffer);
+  }
+
+  const dnsQuestion = this.decodedDnsPacket.questions[0];
+  const dnsQuestionName = dnsutil.questionName(dnsQuestion);
+  const url = `https://cloudflare-dns.com/dns-query?name=${dnsQuestionName}&type=${dnsQuestion.type}`;
+  const headers = {
+    'accept': 'application/dns-message',
+  };
+
+  // Make an HTTP/3 request to Cloudflare DNS
+  fetch(url, {
+    method: 'GET',
+    headers,
+    body: arrayBuffer,
+    cf: {
+      http3: true
+    },
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
     }
-
-    this.stopProcessing = true;
-    this.flag = blockflag || "";
-
-    // gw responses only assigned on A/AAAA/HTTPS/SVCB records
-    // TODO: ALT-SVC records
-    const isGwAns = this.assignGatewayResponseIfNeeded();
-    if (isGwAns) {
-      // overwrite the existing packet (raw) as in the new decoded-packed
-      arrayBuffer = dnsutil.encode(this.decodedDnsPacket);
-    } else {
-      // overwrite the existing packet (decoded) as in the sent array-buffer
-      this.decodedDnsPacket = dnsPacket || dnsutil.decode(arrayBuffer);
-    }
-
+    return response.arrayBuffer();
+  })
+  .then(arrayBuffer => {
     this.httpResponse = new Response(arrayBuffer, {
       headers: this.headers(arrayBuffer),
     });
-  }
-
-  dnsBlockResponse(blockflag) {
-    this.initDecodedDnsPacketIfNeeded();
-    this.stopProcessing = true;
-    this.isDnsBlock = true;
-    this.flag = blockflag;
-
-    try {
-      this.assignBlockResponse();
-      const b = dnsutil.encode(this.decodedDnsPacket);
-      this.httpResponse = new Response(b, {
-        headers: this.headers(b),
-      });
-    } catch (e) {
-      this.log.e("dnsBlock", JSON.stringify(this.decodedDnsPacket), e.stack);
-      this.isException = true;
-      this.exceptionStack = e.stack;
-      this.exceptionFrom = "IOState:dnsBlockResponse";
-      this.httpResponse = new Response(null, {
-        headers: util.concatHeaders(
-          this.headers(),
-          this.additionalHeader(JSON.stringify(this.exceptionStack))
-        ),
-        status: 503,
-      });
-    }
-  }
+  })
+  .catch(error => {
+    this.log.e('dnsResponse error:', error);
+    this.isException = true;
+    this.exceptionStack = error.stack;
+    this.exceptionFrom = 'IOState:dnsResponse';
+    this.httpResponse = new Response(null, {
+      headers: util.concatHeaders(
+        this.headers(),
+        this.additionalHeader(JSON.stringify(this.exceptionStack))
+      ),
+      status: 503,
+    });
+  });
+}
 
   dnsNxDomainResponse() {
     this.initDecodedDnsPacketIfNeeded();

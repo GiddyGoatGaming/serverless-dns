@@ -12,27 +12,32 @@ import * as system from "./system.js";
 import * as util from "./commons/util.js";
 
 export default {
+  // workers/runtime-apis/fetch-event#syntax-module-worker
   async fetch(request, env, context) {
-    return await handleDohRequest(request, env, context);
+    return await serveDoh(request, env, context);
   },
 };
 
-async function handleDohRequest(request, env, context) {
+/**
+ * This function serves the DNS-over-HTTPS (DoH) request.
+ * @param {Request} request The incoming HTTP request.
+ * @param {Object} env The environment variables.
+ * @param {Object} ctx The Cloudflare worker context.
+ * @returns {Promise<Response>} A Promise that resolves to a Response object.
+ */
+async function serveDoh(request, env, ctx) {
+  // Publish system prepare from here instead of from main which
+  // runs in global scope.
   system.pub("prepare", { env });
 
-  const fetchEvent = util.mkFetchEvent(
-    request,
-    null,
-    context.waitUntil.bind(context),
-    context.passThroughOnException.bind(context)
-  );
+  const event = util.mkFetchEvent(request, null, ctx.waitUntil, ctx.passThroughOnException);
 
   try {
     await system.when("go");
-    const response = await handleRequest(fetchEvent);
+    const response = await handleRequest(event);
     return response;
-  } catch (error) {
-    console.error("server", "handleDohRequest error", error);
+  } catch (e) {
+    console.error("server", "serveDoh err", e);
     return util.respond405();
   }
 }

@@ -162,7 +162,7 @@ export default class IOState {
           ),
           status: 503,
         });
-      });
+    }
   }
 
   dnsNxDomainResponse() {

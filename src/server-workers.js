@@ -18,31 +18,26 @@ export default {
   },
 };
 
-function serveDoh(request, env, ctx) {
-  // on Workers, the network-context is only available in an event listener
-  // and so, publish system prepare from here instead of from main which
-  // runs in global-scope.
-  system.pub("prepare", { env: env });
+/**
+ * This function serves the DNS-over-HTTPS (DoH) request.
+ * @param {Request} request The incoming HTTP request.
+ * @param {Object} env The environment variables.
+ * @param {Object} ctx The Cloudflare worker context.
+ * @returns {Promise<Response>} A Promise that resolves to a Response object.
+ */
+async function serveDoh(request, env, ctx) {
+  // Publish system prepare from here instead of from main which
+  // runs in global scope.
+  system.pub("prepare", { env });
 
-  const event = util.mkFetchEvent(
-    request,
-    null,
-    ctx.waitUntil.bind(ctx),
-    ctx.passThroughOnException.bind(ctx)
-  );
+  const event = util.mkFetchEvent(request, null, ctx.waitUntil, ctx.passThroughOnException);
 
-  return new Promise((accept) => {
-    system
-      .when("go")
-      .then((v) => {
-        return handleRequest(event);
-      })
-      .then((response) => {
-        accept(response);
-      })
-      .catch((e) => {
-        console.error("server", "serveDoh err", e);
-        accept(util.respond405());
-      });
-  });
+  try {
+    await system.when("go");
+    const response = await handleRequest(event);
+    return response;
+  } catch (e) {
+    console.error("server", "serveDoh err", e);
+    return util.respond405();
+  }
 }

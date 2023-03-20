@@ -10,5 +10,5 @@ import { createHash } from "crypto";
 import { normalize8 } from "./bufutil.js";
 
 export function md5(b) {
-  return createHash("md5").update(normalize8(b)).digest("hex");
+  return createHash("md5", { digestLength: 32 }).update(normalize8(b)).digest("hex");
 }

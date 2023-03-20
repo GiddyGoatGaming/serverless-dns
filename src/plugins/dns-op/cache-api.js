@@ -20,7 +20,14 @@ export class CacheApi {
     if (this.noop) return false;
     if (!href) return false;
 
-    return await caches.default.match(href);
+    try {
+      const response = await caches.default.match(href);
+      if (response) return response;
+    } catch (error) {
+      log.e(`Error fetching cache: ${error}`);
+    }
+
+    return false;
   }
 
   put(href, response) {

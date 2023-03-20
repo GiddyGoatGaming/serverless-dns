@@ -16,7 +16,7 @@ import IOState from "./io-state.js";
  * @param {FetchEvent} event
  * @returns {Promise<Response>}
  */
-export async function handleRequest(event) {
+export function handleRequest(event) {
   return proxyRequest(event);
 }
 

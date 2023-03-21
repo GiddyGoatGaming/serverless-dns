@@ -81,7 +81,14 @@ export async function auth(rxid, url) {
 
     const [hex, hexcat] = await gen(msg, dom);
 
-    console.debug(rxid, msg, dom, "<= msg/h :auth: hex/k =>", hexcat, accesskeys);
+    console.debug(
+      rxid,
+      msg,
+      dom,
+      "<= msg/h :auth: hex/k =>",
+      hexcat,
+      accesskeys
+    );
 
     // allow if access-key (upto its full len) matches calculated hex
     for (const accesskey of accesskeys) {

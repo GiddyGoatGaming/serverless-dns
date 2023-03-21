@@ -139,19 +139,17 @@ export async function gen(msg, domain) {
   return toks;
 }
 
-// nb: stuble crypto api on node v19+
-// stackoverflow.com/a/47332317
 async function proof(key, val) {
   if (bufutil.emptyBuf(key)) {
     throw new Error("key array-buffer empty");
   }
 
   if (bufutil.emptyBuf(val)) {
-    const hash = await blake3(key);
+    const hash = await hash(key, 'blake3');
     return new Uint8Array(hash);
   }
 
-  const hash = await blake3(val, key);
+  const hash = await hash(val, 'blake3', key);
   return new Uint8Array(hash);
 }
 
@@ -160,15 +158,6 @@ async function sign(key, val) {
     throw new Error("key or value is missing");
   }
 
-  const hmackey = await crypto.subtle.importKey(
-    "raw",
-    key,
-    {
-      name: "BLAKE-3",
-    },
-    false, // export = false
-    ["sign", "verify"]
-  );
-
-  return await crypto.subtle.sign(hmac, hmackey, val);
+  const signature = await hash(val, 'blake3', key);
+  return new Uint8Array(signature);
 }

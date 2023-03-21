@@ -148,7 +148,12 @@ async function proof(key, val) {
   return new Uint8Array(hash);
 }
 
-const hmackey = await crypto.subtle.importKey(
+async function sign(key, val) {
+  if (!key || !val) {
+    throw new Error("key or value is missing");
+  }
+
+  const hmackey = await crypto.subtle.importKey(
     "raw",
     key,
     {

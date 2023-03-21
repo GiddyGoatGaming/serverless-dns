@@ -11,6 +11,7 @@ import * as util from "../../commons/util.js";
 import * as bufutil from "../../commons/bufutil.js";
 import * as envutil from "../../commons/envutil.js";
 import * as rdnsutil from "../../plugins/rdns-util.js";
+import { blake3 } from "hash-wasm";
 
 export const info = "sdns-public-auth-info";
 
@@ -80,7 +81,7 @@ export async function auth(rxid, url) {
 
     const [hex, hexcat] = await gen(msg, dom);
 
-    log.d(rxid, msg, dom, "<= msg/h :auth: hex/k =>", hexcat, accesskeys);
+    console.debug(rxid, msg, dom, "<= msg/h :auth: hex/k =>", hexcat, accesskeys);
 
     // allow if access-key (upto its full len) matches calculated hex
     for (const accesskey of accesskeys) {
@@ -134,29 +135,28 @@ export async function gen(msg, domain) {
 // nb: stuble crypto api on node v19+
 // stackoverflow.com/a/47332317
 async function proof(key, val) {
-  const hmac = "HMAC";
-  const blake2b = "BLAKE2b-256";
-
   if (bufutil.emptyBuf(key)) {
     throw new Error("key array-buffer empty");
   }
 
-  // use blake2b instead of hmac if nothing to sign
   if (bufutil.emptyBuf(val)) {
-    return await crypto.subtle.digest('blake2b', key);
+    const hash = await blake3(key);
+    return new Uint8Array(hash);
   }
 
-  const hmackey = await crypto.subtle.importKey(
+  const hash = await blake3(val, key);
+  return new Uint8Array(hash);
+}
+
+const hmackey = await crypto.subtle.importKey(
     "raw",
     key,
     {
-      name: hmac,
-      hash: { name: blake2b },
+      name: "BLAKE-3",
     },
     false, // export = false
     ["sign", "verify"]
   );
 
-  // hmac sign & verify: stackoverflow.com/a/72765383
   return await crypto.subtle.sign(hmac, hmackey, val);
 }

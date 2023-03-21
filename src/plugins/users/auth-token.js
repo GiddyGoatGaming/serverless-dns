@@ -145,11 +145,11 @@ async function proof(key, val) {
   }
 
   if (bufutil.emptyBuf(val)) {
-    const hash = await hash(key, 'blake3');
+    const hash = await hash(key, "blake3");
     return new Uint8Array(hash);
   }
 
-  const hash = await hash(val, 'blake3', key);
+  const hash = await hash(val, "blake3", key);
   return new Uint8Array(hash);
 }
 
@@ -158,6 +158,6 @@ async function sign(key, val) {
     throw new Error("key or value is missing");
   }
 
-  const signature = await hash(val, 'blake3', key);
+  const signature = await hash(val, "blake3", key);
   return new Uint8Array(signature);
 }

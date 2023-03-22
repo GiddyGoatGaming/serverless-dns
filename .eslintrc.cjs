@@ -2,7 +2,7 @@ module.exports = {
   root: true,
   env: {
     // Which globals variables are allowed.
-    es2021: true,
+    es2022: true,
     node: true,
     worker: true,
   },

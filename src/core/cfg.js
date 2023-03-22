@@ -10,34 +10,18 @@
 import u6cfg from "../u6-basicconfig.json" assert { type: 'json' };
 import u6filetag from "../u6-filetag.json" assert { type: 'json' };
 
-export function timestamp() {
-    return u6cfg.timestamp;
-}
+export const timestamp = () => u6cfg.timestamp;
 
-export function tdNodeCount() {
-    return u6cfg.nodecount;
-}
-  
-export function tdParts() {
-  return u6cfg.tdparts;
-}
+export const tdNodeCount = () => u6cfg.nodecount;
 
-export function tdCodec6() {
-  return u6cfg.useCodec6;
-}
-  
-export function orig() {
-  return u6cfg;
-}
+export const tdParts = () => u6cfg.tdparts;
 
-export function filetag() {
-  return u6filetag;
-}
+export const tdCodec6 = () => u6cfg.useCodec6;
 
-export function tdmd5() {
-  return u6cfg.tdmd5;
-}
+export const orig = () => u6cfg;
 
-export function rdmd5() {
-  return u6cfg.rdmd5;
-}
+export const filetag = () => u6filetag;
+
+export const tdmd5 = () => u6cfg.tdmd5;
+
+export const rdmd5 = () => u6cfg.rdmd5;

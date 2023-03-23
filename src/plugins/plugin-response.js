@@ -6,34 +6,37 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+// Import statements
 import * as util from "../commons/util.js";
 import * as bufutil from "../commons/bufutil.js";
 
+// RResp class
 export class RResp {
-  constructor(data = null, hasex = false, exfrom = "", exstack = "") {
+  constructor(data = new RespData(), isException = false, exceptionFrom = "", exceptionStack = "") {
     /** @type {RespData?} */
-    this.data = data || new RespData();
+    this.data = data;
     /** @type {boolean} */
-    this.isException = hasex;
+    this.isException = isException;
     /** @type {String} */
-    this.exceptionFrom = exfrom;
+    this.exceptionFrom = exceptionFrom;
     /** @type {String} */
-    this.exceptionStack = exstack;
+    this.exceptionStack = exceptionStack;
   }
 }
 
+// RespData class
 export class RespData {
-  constructor(blocked = false, flag, packet, raw, stamps) {
+  constructor(isBlocked = false, flag = "", dnsPacket = null, dnsBuffer = null, stamps = {}) {
     /** @type {boolean} */
-    this.isBlocked = blocked;
+    this.isBlocked = isBlocked;
     /** @type {String} */
-    this.flag = flag || "";
+    this.flag = flag;
     /** @type {Object} */
-    this.dnsPacket = packet || null;
+    this.dnsPacket = dnsPacket;
     /** @type {ArrayBuffer} */
-    this.dnsBuffer = raw || null;
+    this.dnsBuffer = dnsBuffer;
     /** @type {Object?} */
-    this.stamps = stamps || {};
+    this.stamps = stamps;
   }
 }
 
@@ -49,9 +52,9 @@ export function emptyResponse() {
  */
 export function errResponse(id, err) {
   const data = null;
-  const hasex = true;
-  const st = util.emptyObj(err) || !err.stack ? "no-stacktrace" : err.stack;
-  return new RResp(data, hasex, id, st);
+  const isException = true;
+  const stackTrace = util.emptyObj(err) || !err.stack ? "no-stacktrace" : err.stack;
+  return new RResp(data, isException, id, stackTrace);
 }
 
 export function dnsResponse(packet = null, raw = null, stamps = null) {
@@ -59,8 +62,8 @@ export function dnsResponse(packet = null, raw = null, stamps = null) {
     throw new Error("empty packet for dns-res");
   }
   const flags = "";
-  const blocked = false;
-  return new RespData(blocked, flags, packet, raw, stamps);
+  const isBlocked = false;
+  return new RespData(isBlocked, flags, packet, raw, stamps);
 }
 
 /**
@@ -71,8 +74,8 @@ export function rdnsBlockResponse(flag) {
   if (util.emptyString(flag)) {
     throw new Error("no flag set for block-res");
   }
-  const blocked = true;
-  return new RespData(blocked, flag);
+  const isBlocked = true;
+  return new RespData(isBlocked, flag);
 }
 
 /** @returns {RespData} */
@@ -81,7 +84,7 @@ export function rdnsNoBlockResponse() {
 }
 
 /**
- * Copy block related props from one RespData to another
+ * Copy block related properties from one RespData to another
  * @param {RespData} to
  * @param {RespData} from
  * @returns {RespData} to
@@ -89,6 +92,5 @@ export function rdnsNoBlockResponse() {
 export function copyOnlyBlockProperties(to, from) {
   to.isBlocked = from.isBlocked;
   to.flag = from.flag;
-
   return to;
 }

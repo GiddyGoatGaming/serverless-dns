@@ -24,7 +24,7 @@ module.exports = {
     }),
     new webpack.IgnorePlugin({
       resourceRegExp:
-        /^(dgram|http2|\/deno\/.*\.ts$|.*-deno\.ts$|.*\.deno\.ts$|\/node\/.*\.js$|.*-node\.js$|net\.js)$/
+        /(^dgram$)|(^http2$)|(\/deno\/.*\.ts$)|(.*-deno\.ts$)|(.*\.deno\.ts$)|(\/node\/.*\.js$)|(.*-node\.js$)|(.*\.node\.js$)/,
     }),
     // stackoverflow.com/a/65556946
     new NodePolyfillPlugin(),

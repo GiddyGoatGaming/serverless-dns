@@ -18,20 +18,25 @@ const events = Object.freeze(new Set([
   "stop",
 ]));
 
-const listeners = Object.freeze(new Map(
-  [...events, ...stickyEvents].map((event) => [event, new Set()])
-));
+const listeners = Object.freeze(new Map());
+const waitGroup = Object.freeze(new Map());
 
-const waitGroup = Object.freeze(new Map(
-  [...events, ...stickyEvents].map((event) => [event, new Set()])
-));
+for (const e of events) {
+  listeners.set(e, new Set());
+  waitGroup.set(e, new Set());
+}
 
-function pub(event, parcel = undefined) {
+for (const se of stickyEvents) {
+  listeners.set(se, new Set());
+  waitGroup.set(se, new Set());
+}
+
+export async function pub(event, parcel = undefined) {
   awaiters(event, parcel);
   callbacks(event, parcel);
 }
 
-function sub(event, cb) {
+export function sub(event, cb) {
   const eventCallbacks = listeners.get(event);
   if (!eventCallbacks) {
     if (stickyEvents.has(event)) {
@@ -44,7 +49,7 @@ function sub(event, cb) {
   return true;
 }
 
-function when(event, timeout = 0) {
+export function when(event, timeout = 0) {
   const wg = waitGroup.get(event);
   if (!wg) {
     if (stickyEvents.has(event)) {
@@ -53,36 +58,30 @@ function when(event, timeout = 0) {
     return Promise.reject(new Error(`${event} missing`));
   }
   return new Promise((accept, reject) => {
-    const tid = timeout > 0
-      ? util.timeout(timeout, () => {
-          reject(new Error(`${event} elapsed ${timeout}`));
-        })
-      : -2;
-    const fulfiller = function (parcel) {
-      if (tid >= 0) clearTimeout(tid);
+    const fulfiller = (parcel) => {
       accept(parcel, event);
     };
     wg.add(fulfiller);
-    Promise.race([
-      new Promise((_, reject) => {
-        if (timeout > 0) {
-          util.timeout(timeout, () => {
-            reject(new Error(`${event} elapsed ${timeout}`));
-          });
-        }
-      }),
-      new Promise((resolve) => {
-        const cleanup = () => {
-          wg.delete(fulfiller);
-          if (wg.size === 0) {
-            waitGroup.delete(event);
-          }
-        };
-        fulfiller.cleanup = cleanup;
-        fulfiller.resolve = resolve;
-      }),
-    ]).finally(() => {
-      cleanup();
-    });
+    if (timeout > 0) {
+      const tid = util.timeout(timeout, () => {
+        wg.delete(fulfiller);
+        reject(new Error(`${event} elapsed ${timeout}`));
+      });
+      wg.add(() => {
+        clearTimeout(tid);
+      });
+    }
   });
+}
+
+function awaiters(event, parcel) {
+  const g = waitGroup.get(event);
+  if (!g) return;
+  util.safeBox(g, Object.freeze(parcel));
+}
+
+function callbacks(event, parcel) {
+  const cbs = listeners.get(event);
+  if (!cbs) return;
+  util.microtaskBox(cbs, Object.freeze(parcel));
 }

@@ -49,7 +49,8 @@ function when(event, timeout = 0) {
   if (!wg) {
     if (stickyEvents.has(event)) {
       return Promise.resolve(event);
-   .reject(new Error(`${event} missing`));
+    }
+    return Promise.reject(new Error(`${event} missing`));
   }
   return new Promise((accept, reject) => {
     const tid = timeout > 0
@@ -85,23 +86,3 @@ function when(event, timeout = 0) {
     });
   });
 }
-
-function awaiters(event, parcel) {
-  const g = waitGroup.get(event);
-  if (!g) return;
-  if (stickyEvents.has(event)) {
-    waitGroup.delete(event);
-  }
-  util.safeBox(g, parcel);
-}
-
-function callbacks(event, parcel) {
-  const cbs = listeners.get(event);
-  if (!cbs) return;
-  if (stickyEvents.has(event)) {
-    listeners.delete(event);
-  }
-  util.microtaskBox(cbs, parcel);
-}
-
-export { pub, sub, when };

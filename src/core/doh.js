@@ -16,15 +16,7 @@ import IOState from "./io-state.js";
  * @param {FetchEvent} event
  * @returns {Promise<Response>}
  */
-export function handleRequest(event) {
-  return proxyRequest(event);
-}
-
-/**
- * @param {FetchEvent} event
- * @returns {Promise<Response>}
- */
-async function proxyRequest(event) {
+export async function handleRequest(event) {
   if (optionsRequest(event.request)) return util.respond204();
 
   const io = new IOState();
@@ -34,15 +26,14 @@ async function proxyRequest(event) {
     const plugin = new RethinkPlugin(event);
     await plugin.initIoState(io);
 
-    // if an early response has been set by plugin.initIoState, return it
     if (io.httpResponse) {
       return withCors(io, ua);
     }
 
     await util.timedSafeAsyncOp(
-      /* op*/ async () => plugin.execute(),
-      /* waitMs*/ dnsutil.requestTimeout(),
-      /* onTimeout*/ async () => errorResponse(io)
+      async () => plugin.execute(),
+      dnsutil.requestTimeout(),
+      async () => errorResponse(io)
     );
   } catch (err) {
     log.e("doh", "proxy-request error", err.stack);

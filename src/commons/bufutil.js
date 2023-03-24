@@ -27,9 +27,10 @@ export function len(b) {
   return b.byteLength;
 }
 
-const encoder = new TextEncoder();
-const base64 = btoa(String.fromCharCode(...new Uint8Array(encoder.encode(b))));
-return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/m, "");
+export function bytesToBase64Url(b) {
+  const encoder = new TextEncoder();
+  const base64 = btoa(String.fromCharCode(...new Uint8Array(encoder.encode(b))));
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
 function binaryStringToBytes(bs) {

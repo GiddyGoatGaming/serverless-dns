@@ -28,10 +28,9 @@ export function len(b) {
 }
 
 export function bytesToBase64Url(b) {
-  return btoa(String.fromCharCode(...new Uint8Array(b)))
-    .replace(/\//g, "_")
-    .replace(/\+/g, "-")
-    .replace(/=/g, "");
+  let base64 = btoa(String.fromCharCode(...new Uint8Array(b)));
+  base64 = base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+  return base64;
 }
 
 function binaryStringToBytes(bs) {

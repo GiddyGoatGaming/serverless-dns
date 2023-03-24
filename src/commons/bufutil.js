@@ -28,9 +28,9 @@ export function len(b) {
 }
 
 export function bytesToBase64Url(b) {
-  const encoder = new TextEncoder();
-  const base64 = btoa(String.fromCharCode(...new Uint8Array(encoder.encode(b))));
-  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+  let base64 = btoa(String.fromCharCode(...new Uint8Array(b)));
+  base64 = base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+  return base64;
 }
 
 function binaryStringToBytes(bs) {

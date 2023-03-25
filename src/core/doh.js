@@ -20,14 +20,13 @@ export async function handleRequest(event) {
   if (optionsRequest(event.request)) return respond204();
 
   const io = new IOState();
-  const ua = event.request.headers.get("User-Agent  try {
+  const ua = event.request.headers.get("User-Agent");
+  try {
     const plugin = new RethinkPlugin(event);
     await plugin.initIoState(io);
-
     if (io.httpResponse) {
       return withCors(io, ua);
     }
-
     await timedSafeAsyncOp(
       async () => plugin.execute(),
       requestTimeout(),

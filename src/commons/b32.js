@@ -5,7 +5,7 @@
 // and github.com/LinusU/to-data-view/blob/e80ca034/index.js
 
 const ALPHA32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-const RALPHA32 = new Uint8Array(256); // Use Uint8Array instead of object for faster lookups
+const RALPHA32 = new Uint8Array(256);
 for (let i = 0; i < ALPHA32.length; i++) {
   RALPHA32[ALPHA32.charCodeAt(i)] = i;
 }
@@ -25,7 +25,7 @@ function toDataView(data) {
 }
 
 function readChar(chr) {
-  const idx = RALPHA32[chr.charCodeAt(0)]; // Use charCodeAt for faster lookups
+  const idx = RALPHA32[chr.charCodeAt(0)];
   if (idx === undefined) {
     throw new Error("invalid b32 character: " + chr);
   }
@@ -72,9 +72,9 @@ export function rbase32(input) {
   let index = 0;
   const output = new Uint8Array(((length * 5) / 8) | 0);
 
-  for (let i = 0; i < length; i++) {
-    valuevalue << 5) | readChar(input[i]);
-    bits += 5;
+  for (let i = 0; i; i++) {
+    value = (value << 5) | readChar(input[i]);
+    bits 5;
 
     if (bits >= 8) {
       output[index++] = (value >>> (bits - 8)) & 255;

@@ -5,10 +5,10 @@
 // and github.com/LinusU/to-data-view/blob/e80ca034/index.js
 
 const ALPHA32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-const RALPHA32 = ALPHA32.split("").reduce((o, c, i) => {
-  o[c] = i;
-  return o;
-}, {});
+const RALPHA32 = new Uint8Array(256); // Use Uint8Array instead of object for faster lookups
+for (let i = 0; i < ALPHA32.length; i++) {
+  RALPHA32[ALPHA32.charCodeAt(i)] = i;
+}
 
 function toDataView(data) {
   if (
@@ -18,34 +18,30 @@ function toDataView(data) {
   ) {
     return new DataView(data.buffer, data.byteOffset, data.byteLength);
   }
-
   if (data instanceof ArrayBuffer) {
     return new DataView(data);
   }
-
-  throw new Error("cannot create data-view from given input");
+  return null;
 }
 
 function readChar(chr) {
-  chr = chr.toUpperCase();
-  const idx = RALPHA32[chr];
-
+  const idx = RALPHA32[chr.charCodeAt(0)]; // Use charCodeAt for faster lookups
   if (idx === undefined) {
     throw new Error("invalid b32 character: " + chr);
   }
-
   return idx;
 }
 
-export function base32(arrbuf, padding) {
+function base32(arrbuf, padding) {
   const view = toDataView(arrbuf);
+  if (!view) throw new Error("cannot create data-view from given input");
 
   let bits = 0;
   let value = 0;
   let output = "";
 
-  for (const byte of view.buffer) {
-    value = (value << 8) | byte;
+  for (let i = 0; i < view.byteLength; i++) {
+    value = (value << 8) | view.getUint8(i);
     bits += 8;
 
     while (bits >= 5) {
@@ -59,9 +55,8 @@ export function base32(arrbuf, padding) {
   }
 
   if (padding) {
-    const paddingLength = output.length % 8;
-    if (paddingLength !== 0) {
-      output += "=".repeat(8 - paddingLength);
+    while (output.length % 8 !== 0) {
+      output += "=";
     }
   }
 
@@ -72,15 +67,13 @@ export function rbase32(input) {
   input = input.replace(/=+$/, "");
 
   const length = input.length;
-
   let bits = 0;
   let value = 0;
-
   let index = 0;
-  const output = Uint8Array.from({ length: ((length * 5) / 8) | 0 });
+  const output = new Uint8Array(((length * 5) / 8) | 0);
 
   for (let i = 0; i < length; i++) {
-    value = (value << 5) | readChar(input[i]);
+    valuevalue << 5) | readChar(input[i]);
     bits += 5;
 
     if (bits >= 8) {

@@ -10,51 +10,85 @@ import * as util from "../commons/util.js";
 import * as bufutil from "../commons/bufutil.js";
 
 export class RResp {
-  constructor(data = new RespData(), isException = false, exceptionFrom = "", exceptionStack = "") {
-    this.data = data;
-    this.isException = isException;
-    this.exceptionFrom = exceptionFrom;
-    this.exceptionStack = exceptionStack;
+  constructor(data = null, hasex = false, exfrom = "", exstack = "") {
+    /** @type {RespData?} */
+    this.data = data || new RespData();
+    /** @type {boolean} */
+    this.isException = hasex;
+    /** @type {String} */
+    this.exceptionFrom = exfrom;
+    /** @type {String} */
+    this.exceptionStack = exstack;
   }
 }
 
 export class RespData {
-  constructor({ isBlocked = false, flag = "", dnsPacket = null, dnsBuffer = null, stamps = {} } = {}) {
-    this.isBlocked = isBlocked;
-    this.flag = flag;
-    this.dnsPacket = dnsPacket;
-    this.dnsBuffer = dnsBuffer;
-    this.stamps = stamps;
+  constructor(blocked = false, flag, packet, raw, stamps) {
+    /** @type {boolean} */
+    this.isBlocked = blocked;
+    /** @type {String} */
+    this.flag = flag || "";
+    /** @type {Object} */
+    this.dnsPacket = packet || null;
+    /** @type {ArrayBuffer} */
+    this.dnsBuffer = raw || null;
+    /** @type {Object?} */
+    this.stamps = stamps || {};
   }
 }
 
+/** @returns {RResp} */
 export function emptyResponse() {
   return new RResp();
 }
 
-export function errResponse(id, err = new Error()) {
-  const st = err.stack || "no-stacktrace";
-  return new RResp(null, true, id, st);
+/**
+ * @param {String} id
+ * @param {Error} err
+ * @returns {RResp}
+ */
+export function errResponse(id, err) {
+  const data = null;
+  const hasex = true;
+  const st = util.emptyObj(err) || !err.stack ? "no-stacktrace" : err.stack;
+  return new RResp(data, hasex, id, st);
 }
 
-export function dnsResponse(packet, raw, stamps) {
-  if (!packet || !ArrayBuffer.isView(raw)) {
+export function dnsResponse(packet = null, raw = null, stamps = null) {
+  if (util.emptyObj(packet) || bufutil.emptyBuf(raw)) {
     throw new Error("empty packet for dns-res");
   }
-  return new RespData({ dnsPacket: packet, dnsBuffer: raw, stamps });
+  const flags = "";
+  const blocked = false;
+  return new RespData(blocked, flags, packet, raw, stamps);
 }
 
+/**
+ * @param {String} flag
+ * @returns {RespData}
+ */
 export function rdnsBlockResponse(flag) {
-  if (!flag) {
+  if (util.emptyString(flag)) {
     throw new Error("no flag set for block-res");
   }
-  return new RespData({ isBlocked: true, flag });
+  const blocked = true;
+  return new RespData(blocked, flag);
 }
 
+/** @returns {RespData} */
 export function rdnsNoBlockResponse() {
-  return new RespData();
+  return new RespData(false);
 }
 
+/**
+ * Copy block related props from one RespData to another
+ * @param {RespData} to
+ * @param {RespData} from
+ * @returns {RespData} to
+ */
 export function copyOnlyBlockProperties(to, from) {
-  return Object.assign(to, { isBlocked: from.isBlocked, flag: from.flag });
+  to.isBlocked = from.isBlocked;
+  to.flag = from.flag;
+
+  return to;
 }

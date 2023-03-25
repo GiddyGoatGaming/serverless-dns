@@ -8,16 +8,12 @@
 
 // github.com/serverless-dns/trie/blob/49049a87/src/config.js#L22
 const defaults = {
-  // inspect trie building stats
   inspect: false,
-  // debug prints debug logs
   debug: false,
-  // use codec-type b6 to convert js-str to bytes and vice-versa
   useCodec6: false,
-  // optimize storing flags, that is, store less than 3 flags as-is
   optflags: false,
 };
 
 export function withDefaults(cfg) {
-return { ...defaults, ...cfg };
+  return { ...defaults, ...cfg };
 }

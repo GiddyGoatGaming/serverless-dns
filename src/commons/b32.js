@@ -72,9 +72,9 @@ export function rbase32(input) {
   let index = 0;
   const output = new Uint8Array(((length * 5) / 8) | 0);
 
-  for (let i = 0; i; i++) {
+  for (let i = 0; i < length; i++) {
     value = (value << 5) | readChar(input[i]);
-    bits 5;
+    bits += 5;
 
     if (bits >= 8) {
       output[index++] = (value >>> (bits - 8)) & 255;

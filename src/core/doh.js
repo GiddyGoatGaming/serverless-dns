@@ -7,9 +7,9 @@
  */
 
 import RethinkPlugin from "./plugin.js";
-import * as pres from "../plugins/plugin-response.js";
-import * as util from "../commons/util.js";
-import * as dnsutil from "../commons/dnsutil.js";
+import { respond204, timedSafeAsyncOp, fromBrowser } from "../commons/util.js";
+import { requestTimeout } from "../commons/dnsutil.js";
+import { errResponse } from "../plugins/plugin-response.js";
 import IOState from "./io-state.js";
 
 /**
@@ -17,12 +17,10 @@ import IOState from "./io-state.js";
  * @returns {Promise<Response>}
  */
 export async function handleRequest(event) {
-  if (optionsRequest(event.request)) return util.respond204();
+  if (optionsRequest(event.request)) return respond204();
 
   const io = new IOState();
-  const ua = event.request.headers.get("User-Agent");
-
-  try {
+  const ua = event.request.headers.get("User-Agent  try {
     const plugin = new RethinkPlugin(event);
     await plugin.initIoState(io);
 
@@ -30,13 +28,13 @@ export async function handleRequest(event) {
       return withCors(io, ua);
     }
 
-    await util.timedSafeAsyncOp(
+    await timedSafeAsyncOp(
       async () => plugin.execute(),
-      dnsutil.requestTimeout(),
+      requestTimeout(),
       async () => errorResponse(io)
     );
   } catch (err) {
-    log.e("doh", "proxy-request error", err.stack);
+    console.error("doh", "proxy-request error", err.stack);
     errorResponse(io, err);
   }
 
@@ -48,11 +46,11 @@ function optionsRequest(request) {
 }
 
 function errorResponse(io, err = null) {
-  const eres = pres.errResponse("doh.js", err);
+  const eres = errResponse("doh.js", err);
   io.dnsExceptionResponse(eres);
 }
 
 function withCors(io, ua) {
-  if (util.fromBrowser(ua)) io.setCorsHeadersIfNeeded();
+  if (fromBrowser(ua)) io.setCorsHeadersIfNeeded();
   return io.httpResponse;
 }

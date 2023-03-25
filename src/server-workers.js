@@ -18,11 +18,11 @@ export default {
   },
 };
 
-async function serveDoh(request, env, ctx) {
+function serveDoh(request, env, ctx) {
   // on Workers, the network-context is only available in an event listener
   // and so, publish system prepare from here instead of from main which
   // runs in global-scope.
-  system.pub("prepare", { env });
+  system.pub("prepare", { env: env });
 
   const event = util.mkFetchEvent(
     request,
@@ -31,14 +31,18 @@ async function serveDoh(request, env, ctx) {
     ctx.passThroughOnException.bind(ctx)
   );
 
-  try {
-    const [go, response] = await Promise.all([
-      system.when("go"),
-      handleRequest(event),
-    ]);
-    return response;
-  } catch (e) {
-    console.error("server", "serveDoh err", e);
-    return util.respond405();
-  }
+  return new Promise((accept) => {
+    system
+      .when("go")
+      .then((v) => {
+        return handleRequest(event);
+      })
+      .then((response) => {
+        accept(response);
+      })
+      .catch((e) => {
+        console.error("server", "serveDoh err", e);
+        accept(util.respond405());
+      });
+  });
 }

@@ -43,7 +43,7 @@ export async function handleRequest(event) {
 
   // Add Alt-Svc header for HTTP/3 requests
   if (isHttp3) {
-    io.httpResponse.headers.set("Alt-Svc", 'h3=":443"; ma=86400');
+    io.httpResponse.headers.set("Alt-Svc", "h3=\":443\"; ma=86400");
   }
 
   return withCors(io, ua);

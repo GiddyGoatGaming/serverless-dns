@@ -21,6 +21,10 @@ export async function handleRequest(event) {
 
   const io = new IOState();
   const ua = event.request.headers.get("User-Agent");
+
+  // Check if the request was made over HTTP/3
+  const isHttp3 = event.request.cf && event.request.cf.httpProtocol === "h3";
+
   try {
     const plugin = new RethinkPlugin(event);
     await plugin.initIoState(io);
@@ -35,6 +39,11 @@ export async function handleRequest(event) {
   } catch (err) {
     console.error("doh", "proxy-request error", err.stack);
     errorResponse(io, err);
+  }
+
+  // Add Alt-Svc header for HTTP/3 requests
+  if (isHttp3) {
+    io.httpResponse.headers.set("Alt-Svc", 'h3=":443"; ma=86400');
   }
 
   return withCors(io, ua);

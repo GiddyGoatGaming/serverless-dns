@@ -65,18 +65,22 @@ export class DnsBlocker {
       return res;
     }
 
-    const domains = dnsutil.extractDomains(dnsPacket);
-    const bres = this.block(domains, blockInfo, stamps);
+    const deny = rdnsutil.shouldBlock(blockInfo);
+    const isAns = dnsutil.isAnswer(dnsPacket);
+    const response = pres.copyOnlyBlockProperties(res, rdnsutil.rdnsNoBlockResponse());
+    const r = rdnsutil.doBlockQuery(deny, dnsPacket, response, stamps, isAns);
 
-    return pres.copyOnlyBlockProperties(res, bres);
-  }
-
-  block(names, blockInfo, blockstamps) {
-    let r = pres.rdnsNoBlockResponse();
-    for (const n of names) {
-      r = rdnsutil.doBlock(n, blockInfo, blockstamps);
-      if (r.isBlocked) break;
+    if (deny) {
+      // create block packets/buffers in dnsBlocker.js
+      this.addCtx("blockflag", r.flag);
+      io.dnsBlockResponse(r.flag);
+    } else if (response.isException || !isAns) {
+      // if not blocked, but then, no-ans or is-exception, then:
+      this.loadException(rxid, response, io);
+    } else {
+      this.addCtx("responseBodyBuffer", r.dnsBuffer);
+      this.addCtx("responseDecodedDnsPacket", r.dnsPacket);
+      this.addCtx("blockflag", r.flag);
+      io.dnsResponse(r.dnsBuffer, r.dnsPacket, r.flag);
     }
-    return r;
   }
-}

@@ -291,11 +291,22 @@ export default class EnvManager {
   }
 
   determineEnvStage() {
-    if (this.runtime === "node") return this.get("NODE_ENV");
-    if (this.runtime === "worker") return this.get("WORKER_ENV");
-    if (this.runtime === "deno") return this.get("DENO_ENV");
-    if (this.runtime === "fastly") return this.get("FASTLY_ENV");
-    return null;
+    const stage = this.get(this.runtime === "node" ? "NODE_ENV" :
+      this.runtime === "worker" ? "WORKER_ENV" :
+      this.runtime === "deno" ? "DENO_ENV" :
+      this.runtime === "fastly" ? "FASTLY_ENV" : null);
+
+    if (stage === null) return null;
+
+    if (stage === "test" || stage === "development" || stage === "local") {
+      return "dev";
+    } else if (stage === "staging") {
+      return "stage";
+    } else if (stage === "production") {
+      return "prod";
+    } else {
+      return null;
+    }
   }
 
   // most-likely but not definitive platform this code is running on

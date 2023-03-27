@@ -12,16 +12,12 @@ import * as system from "./system.js";
 import * as util from "./commons/util.js";
 
 export default {
-  // workers/runtime-apis/fetch-event#syntax-module-worker
   async fetch(request, env, context) {
-    return await serveDoh(request, env, context);
+    return serveDoh(request, env, context);
   },
 };
 
-function serveDoh(request, env, ctx) {
-  // on Workers, the network-context is only available in an event listener
-  // and so, publish system prepare from here instead of from main which
-  // runs in global-scope.
+const serveDoh = async (request, env, ctx) => {
   system.pub("prepare", { env: env });
 
   const event = util.mkFetchEvent(
@@ -31,18 +27,12 @@ function serveDoh(request, env, ctx) {
     ctx.passThroughOnException.bind(ctx)
   );
 
-  return new Promise((accept) => {
-    system
-      .when("go")
-      .then((v) => {
-        return handleRequest(event);
-      })
-      .then((response) => {
-        accept(response);
-      })
-      .catch((e) => {
-        console.error("server", "serveDoh err", e);
-        accept(util.respond405());
-      });
-  });
-}
+  try {
+    const goEvent = await system.when("go");
+    const response = await handleRequest(event);
+    return response;
+  } catch (e) {
+    console.error("server", "serveDoh err", e);
+    return util.respond405();
+  }
+};

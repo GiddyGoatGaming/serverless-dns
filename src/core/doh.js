@@ -32,6 +32,15 @@ export async function handleRequest(event) {
       requestTimeout(),
       async () => errorResponse(io)
     );
+
+    // Enable HTTP/3
+    const fetchPromise = fetch(event.request, {
+      quic: {
+        version: "h3",
+      },
+    });
+    const response = await fetchPromise;
+    return response;
   } catch (err) {
     console.error("doh", "proxy-request error", err.stack);
     errorResponse(io, err);

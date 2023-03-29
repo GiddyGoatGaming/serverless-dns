@@ -27,11 +27,29 @@ export async function handleRequest(event) {
     if (io.httpResponse) {
       return withCors(io, ua);
     }
-    await timedSafeAsyncOp(
-      async () => plugin.execute(),
-      requestTimeout(),
-      async () => errorResponse(io)
-    );
+
+    const primaryUrl = process.env.CF_DNS_RESOLVER_URL;
+    const secondaryUrl = process.env.CF_DNS_RESOLVER_URL_2;
+
+    const primaryResponse = await fetch(primaryUrl, {
+      method: "POST",
+      mode: "http3",
+      body: await event.request.arrayBuffer()
+    });
+    if (primaryResponse.ok) {
+      return primaryResponse;
+    }
+
+    const secondaryResponse = await fetch(secondaryUrl, {
+      method: "POST",
+      mode: "http3",
+      body: await event.request.arrayBuffer()
+    });
+    if (secondaryResponse.ok) {
+      return secondaryResponse;
+    }
+
+    errorResponse(io);
   } catch (err) {
     console.error("doh", "proxy-request error", err.stack);
     errorResponse(io, err);

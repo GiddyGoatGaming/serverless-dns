@@ -4,5 +4,5 @@
   "semi": true,
   "singleQuote": false,
   "quoteProps": "consistent",
-  "trailingComma": "es2022"
+  "trailingComma": "es5"
 }

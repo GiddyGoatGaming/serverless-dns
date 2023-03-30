@@ -472,7 +472,7 @@ export function isGatewayQuery(p) {
 }
 
 function isNumeric4(str) {
-  return /^[0-9.]+$/.test(str);
+  return /^\d+(\.\d+)*$/.test(str);
 }
 
 function isHex6(str) {

@@ -138,7 +138,8 @@ export function vmid() {
 }
 
 export function taskBox(fn) {
-  setTimeout(() => safeBox(fn), 0}
+  setTimeout(() => safeBox(fn), 0);
+}
 
 const taskboxPromise = { p: Promise.resolve() };
 export function microtaskBox(fns, arg) {

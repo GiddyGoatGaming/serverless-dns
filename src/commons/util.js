@@ -12,30 +12,20 @@
  */
 // musn't import any non-std modules
 
-export function fromBrowser(ua) {
-  return ua && ua.startsWith("Mozilla/5.0");
-}
+export const fromBrowser = (ua) => ua && ua.startsWith("Mozilla/5.0");
 
-export function jsonHeaders() {
-  return {
-    "Content-Type": "application/json",
-  };
-}
+export const jsonHeaders = () => ({ "Content-Type": "application/json" });
 
-export function dnsHeaders() {
-  return {
-    "Accept": "application/dns-message",
-    "Content-Type": "application/dns-message",
-  };
-}
+export const dnsHeaders = () => ({
+  "Accept": "application/dns-message",
+  "Content-Type": "application/dns-message",
+});
 
-export function corsHeaders() {
-  return {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  };
-}
+export const corsHeaders = () => ({
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+});
 
 /**
  * @param {String} ua - User Agent string
@@ -304,11 +294,13 @@ export function mapOf(obj) {
 }
 
 export function isAlphaNumeric(str) {
-  return /^[a-z0-9]+$/i.test(str);
+  const regex = /^[a-zA-Z0-9]+$/;
+  return regex.test(str);
 }
 
 export function isDNSName(str) {
-  return /^[a-z0-9\.-]+$/i.test(str);
+  const regex = /^[a-zA-Z0-9.-]+$/;
+  return regex.test(str);
 }
 
 export function strstr(str, start = 0, end = str.length) {

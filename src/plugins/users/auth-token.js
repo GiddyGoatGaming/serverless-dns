@@ -11,7 +11,6 @@ import * as util from "../../commons/util.js";
 import * as bufutil from "../../commons/bufutil.js";
 import * as envutil from "../../commons/envutil.js";
 import * as rdnsutil from "../../plugins/rdns-util.js";
-import { blake3 } from "hash-wasm";
 
 export const info = "sdns-public-auth-info";
 
@@ -81,14 +80,7 @@ export async function auth(rxid, url) {
 
     const [hex, hexcat] = await gen(msg, dom);
 
-    console.debug(
-      rxid,
-      msg,
-      dom,
-      "<= msg/h :auth: hex/k =>",
-      hexcat,
-      accesskeys
-    );
+    log.d(rxid, msg, dom, "<= msg/h :auth: hex/k =>", hexcat, accesskeys);
 
     // allow if access-key (upto its full len) matches calculated hex
     for (const accesskey of accesskeys) {
@@ -139,25 +131,32 @@ export async function gen(msg, domain) {
   return toks;
 }
 
+// nb: stuble crypto api on node v19+
+// stackoverflow.com/a/47332317
 async function proof(key, val) {
+  const hmac = "HMAC";
+  const sha256 = "SHA-256";
+
   if (bufutil.emptyBuf(key)) {
     throw new Error("key array-buffer empty");
   }
 
+  // use sha256 instead of hmac if nothing to sign
   if (bufutil.emptyBuf(val)) {
-    const hash = await hash(key, "blake3");
-    return new Uint8Array(hash);
+    return await crypto.subtle.digest(sha256, key);
   }
 
-  const hash = await hash(val, "blake3", key);
-  return new Uint8Array(hash);
-}
+  const hmackey = await crypto.subtle.importKey(
+    "raw",
+    key,
+    {
+      name: hmac,
+      hash: { name: sha256 },
+    },
+    false, // export = false
+    ["sign", "verify"]
+  );
 
-async function sign(key, val) {
-  if (!key || !val) {
-    throw new Error("key or value is missing");
-  }
-
-  const signature = await hash(val, "blake3", key);
-  return new Uint8Array(signature);
+  // hmac sign & verify: stackoverflow.com/a/72765383
+  return await crypto.subtle.sign(hmac, hmackey, val);
 }

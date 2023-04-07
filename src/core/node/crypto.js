@@ -10,5 +10,5 @@ import { createHash } from "crypto";
 import { normalize8 } from "./bufutil.js";
 
 export function blake2b(b) {
-  return createHash("blake2b256", { digestLength: 32 }).update(normalize8(b)).digest("hex");
+  return createHash("blake2b", { digestLength: 8 }).update(normalize8(b)).digest("hex");
 }

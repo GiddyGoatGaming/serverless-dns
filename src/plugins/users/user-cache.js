@@ -8,27 +8,20 @@
 
 import { LfuCache } from "@serverless-dns/lfu-cache";
 
-const cacheInstances = new WeakMap();
-
 export class UserCache {
   constructor(size) {
     const name = "UserCache";
-    const cache = new LfuCache(name, size);
-    cacheInstances.set(this, cache);
+    this.cache = new LfuCache(name, size);
     this.log = log.withTags(name);
   }
 
   get(key) {
-    return cacheInstances.get(this).get(key);
+    return this.cache.get(key);
   }
 
   put(key, val) {
-    if (typeof key !== "string" || typeof val !== "object") {
-      throw new Error("Invalid input: key must be a string and val must be an object");
-    }
-
     try {
-      cacheInstances.get(this).put(key, val);
+      this.cache.put(key, val);
     } catch (e) {
       this.log.e("put", key, val, e.stack);
     }

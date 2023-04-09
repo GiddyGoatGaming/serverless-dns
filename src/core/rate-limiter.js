@@ -6,38 +6,39 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-const RATE_LIMIT_CAPACITY = 300; // max amount of requests at once. Only used if over 30 requests a sec
-const RATE_LIMIT_FILL_RATE = 30; // max amount of requests that can be processed a sec before going to RATE_LIMIT_CAPACITY
+const RATE_LIMIT_WINDOW_SIZE = 1000; // 1 second
+const RATE_LIMIT_WINDOW_LIMIT = 30; // max amount of requests in 1 second
 
 class RateLimiter {
   constructor() {
-    this.bucket = {
-      capacity: RATE_LIMIT_CAPACITY,
-      tokens: RATE_LIMIT_CAPACITY,
+    this.window = {
+      size: RATE_LIMIT_WINDOW_SIZE,
+      limit: RATE_LIMIT_WINDOW_LIMIT,
+      requests: [],
     };
     setInterval(() => {
-      if (this.bucket.tokens < this.bucket.capacity) {
-        this.bucket.tokens += RATE_LIMIT_FILL_RATE;
-      }
-    }, 1000 / RATE_LIMIT_FILL_RATE);
+      this.window.requests = this.window.requests.filter((timestamp) => {
+        return Date.now() - timestamp < this.window.size;
+      });
+    }, this.window.size);
   }
 
   async middleware(request) {
-    if (this.bucket.tokens >= 1) {
-      this.bucket.tokens--;
-      return true;
-    } else {
-      return new Response("Too Many Requests", {
-        status: 429,
+    if (this.window.requests.length >= this.window.limit) {
+      return new Response("Service Unavailable", {
+        status: 503,
         headers: {
-          "Retry-After": 60,
+          "Retry-After": this.window.size / 1000,
         },
       });
+    } else {
+      this.window.requests.push(Date.now());
+      return true;
     }
   }
 
   incrementToken() {
-    this.bucket.tokens++;
+    // no-op, not needed for sliding window algorithm
   }
 }
 

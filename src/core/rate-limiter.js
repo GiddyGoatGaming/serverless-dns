@@ -11,28 +11,35 @@ const RATE_LIMIT_WINDOW_LIMIT = 30; // max amount of requests in 1 second
 
 class RateLimiter {
   constructor() {
-    this.window = {
-      size: RATE_LIMIT_WINDOW_SIZE,
-      limit: RATE_LIMIT_WINDOW_LIMIT,
-      requests: [],
-    };
-    setInterval(() => {
-      this.window.requests = this.window.requests.filter((timestamp) => {
-        return Date.now() - timestamp < this.window.size;
-      });
-    }, this.window.size);
+    this.devices = {};
   }
 
   async middleware(request) {
-    if (this.window.requests.length >= this.window.limit) {
+    const ipAddress = request.headers.get("X-Forwarded-For");
+    if (!ipAddress) {
+      // Unable to determine IP address, treat as separate device
+      return this._checkRequest(ipAddress);
+    }
+    if (!this.devices[ipAddress]) {
+      this.devices[ipAddress] = [];
+    }
+    return this._checkRequest(ipAddress);
+  }
+
+  _checkRequest(ipAddress) {
+    const now = Date.now();
+    this.devices[ipAddress] = this.devices[ipAddress].filter((timestamp) => {
+      return now - timestamp < RATE_LIMIT_WINDOW_SIZE;
+    });
+    if (this.devices[ipAddress].length >= RATE_LIMIT_WINDOW_LIMIT) {
       return new Response("Service Unavailable", {
         status: 503,
         headers: {
-          "Retry-After": this.window.size / 1000,
+          "Retry-After": RATE_LIMIT_WINDOW_SIZE / 1000,
         },
       });
     } else {
-      this.window.requests.push(Date.now());
+      this.devices[ipAddress].push(now);
       return true;
     }
   }

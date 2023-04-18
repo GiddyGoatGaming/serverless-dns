@@ -116,7 +116,7 @@ const defaults = new Map(
     // primary doh upstream
     CF_DNS_RESOLVER_URL: {
       type: "string",
-      default: "h3://freedns.controld.com/p1",
+      default: "h3://freedns.controld.com/no-malware-typo-drugs",
     },
     // secondary doh upstream
     CF_DNS_RESOLVER_URL_2: {

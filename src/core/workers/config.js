@@ -38,12 +38,9 @@ function prepare(args) {
   system.pub("ready", { env: args.env });
 }
 
-/**
- * Starts the system if services are ready
- */
 function start() {
   if (!services.ready) {
-    console.error("services not yet ready, and we've got a sig-up?!");
+    log.e("services not yet ready, and we've got a sig-up?!");
     return;
   }
 

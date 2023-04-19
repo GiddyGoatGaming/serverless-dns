@@ -43,10 +43,6 @@ class RateLimiter {
       return true;
     }
   }
-
-  incrementToken() {
-    // no-op, not needed for sliding window algorithm
-  }
 }
 
 export default new RateLimiter();

@@ -167,18 +167,13 @@ export function hasAnswer(v) {
 }
 
 export function isAnswerFresh(m, n = 0) {
-  // when expiry is 0, c.dnsPacket is a question and not an ans
-  // ref: determineCacheExpiry
+  const cacheTtl = envutil.cacheTtl() * 1000;
   const now = Date.now();
-  const ttl = envutil.cacheTtl() * 1000;
-  const r = n || util.rolldice(6);
-  if (r % 6 === 0) {
-    // 1 in 6 (~15% of the time), fresh if answer-ttl hasn't expired
-    return m.expiry > 0 && now <= m.expiry - ttl;
-  } else {
-    // 5 in 6, fresh if cache-ttl hasn't expired, regardless of answer-ttl
-    return m.expiry > 0 && now <= m.expiry;
-  }
+  const expiry = m.expiry;
+  const isFresh = expiry > 0 && now <= expiry - cacheTtl & (n || util.rolldice(6)) % 6 === 0
+    ? expiry > 0 && now <= expiry - cacheTtl
+    : expiry > 0 && now <= expiry;
+  return isFresh;
 }
 
 export function updatedAnswer(dnsPacket, qid, expiry) {

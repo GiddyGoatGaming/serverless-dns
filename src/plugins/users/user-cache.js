@@ -15,9 +15,10 @@ export class UserCache {
     this.log = log.withTags(name);
   }
 
-  get(key) {
-    return this.cache.get(key);
-  }
+get(key) {
+  const cache = cacheInstances.get(this);
+  return cache.has(key) ? cache[key] : undefined;
+}
 
   put(key, val) {
     try {

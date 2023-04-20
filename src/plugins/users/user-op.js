@@ -46,45 +46,42 @@ export class UserOp {
    * @param {{request: Request, isDnsMsg: Boolean, rxid: string}} ctx
    * @returns {pres.RResp}
    */
-  loadUser(ctx) {
-    let response = pres.emptyResponse();
+loadUser(ctx) {
+  let response = pres.emptyResponse();
 
-    if (!ctx.isDnsMsg) {
-      this.log.w(ctx.rxid, "not a dns-msg, ignore");
-      return response;
-    }
-
-    try {
-      const blocklistFlag = rdnsutil.blockstampFromUrl(ctx.request.url);
-
-      if (util.emptyString(blocklistFlag)) {
-        this.log.d(ctx.rxid, "empty blocklist-flag", ctx.request.url);
-      }
-
-      // blocklistFlag may be invalid, ref rdnsutil.blockstampFromUrl
-      let r = this.userConfigCache.get(blocklistFlag);
-      if (!util.emptyString(blocklistFlag) && util.emptyObj(r)) {
-        r = rdnsutil.unstamp(blocklistFlag);
-
-        // FIXME: add to cache iff !empty(r.userBlocklistFlagUint)?
-        this.log.d(ctx.rxid, "new cfg cache kv", blocklistFlag, r);
-        // TODO: blocklistFlag is not normalized, ie b32 used for dot isn't
-        // converted to its b64 form (which doh and rethinkdns modules use)
-        // example, b32: 1-AABABAA / equivalent b64: 1:AAIAgA==
-        this.userConfigCache.put(blocklistFlag, r);
-      } else {
-        this.log.d(ctx.rxid, "cfg cache hit?", r != null, blocklistFlag, r);
-      }
-
-      response.data.userBlocklistInfo = r;
-      response.data.userBlocklistFlag = blocklistFlag;
-      // sets user-preferred doh upstream
-      response.data.dnsResolverUrl = null;
-    } catch (e) {
-      this.log.e(ctx.rxid, "loadUser", e);
-      response = pres.errResponse("UserOp:loadUser", e);
-    }
-
+  if (!ctx.isDnsMsg) {
+    this.log.w(ctx.rxid, "not a dns-msg, ignore");
     return response;
   }
+
+  try {
+    const blocklistFlag = rdnsutil.blockstampFromUrl(ctx.request.url);
+
+    if (util.emptyString(blocklistFlag)) {
+      this.log.d(ctx.rxid, "empty blocklist-flag", ctx.request.url);
+    }
+
+    // blocklistFlag may be invalid, ref rdnsutil.blockstampFromUrl
+    let r = this.userConfigCache.get(blocklistFlag);
+    if (!util.emptyString(blocklistFlag) && util.emptyObj(r)) {
+      r = rdnsutil.unstamp(blocklistFlag);
+
+      if (!util.emptyObj(r.userBlocklistFlagUint)) {
+        this.log.d(ctx.rxid, "new cfg cache kv", blocklistFlag, r);
+        this.userConfigCache.put(blocklistFlag, r);
+      }
+    } else {
+      this.log.d(ctx.rxid, "cfg cache hit?", r != null, blocklistFlag, r);
+    }
+
+    response.data.userBlocklistInfo = r;
+    response.data.userBlocklistFlag = blocklistFlag;
+    // sets user-preferred doh upstream
+    response.data.dnsResolverUrl = null;
+  } catch (e) {
+    this.log.e(ctx.rxid, "loadUser", e);
+    response = pres.errResponse("UserOp:loadUser", e);
+  }
+
+  return response;
 }

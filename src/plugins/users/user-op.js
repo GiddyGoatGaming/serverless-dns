@@ -68,11 +68,9 @@ export class UserOp {
 
         // FIXME: add to cache iff !empty(r.userBlocklistFlagUint)?
         this.log.d(ctx.rxid, "new cfg cache kv", blocklistFlag, r);
-        // Normalize blocklistFlag to its b64 form, if applicable
-        if (blocklistFlag.includes("-")) {
-          const b64Flag = rdnsutil.b32ToB64(blocklistFlag);
-          blocklistFlag = `${b64Flag[0]}:${b64Flag[1]}`;
-        }
+        // TODO: blocklistFlag is not normalized, ie b32 used for dot isn't
+        // converted to its b64 form (which doh and rethinkdns modules use)
+        // example, b32: 1-AABABAA / equivalent b64: 1:AAIAgA==
         this.userConfigCache.put(blocklistFlag, r);
       } else {
         this.log.d(ctx.rxid, "cfg cache hit?", r != null, blocklistFlag, r);

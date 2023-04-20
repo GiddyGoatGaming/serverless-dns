@@ -66,9 +66,12 @@ export class UserOp {
       if (!util.emptyString(blocklistFlag) && util.emptyObj(r)) {
         r = rdnsutil.unstamp(blocklistFlag);
 
-        if (!util.emptyObj(r.userBlocklistFlagUint)) {
+        if (!util.empty(r.userBlocklistFlagUint)) {
           this.log.d(ctx.rxid, "new cfg cache kv", blocklistFlag, r);
-          this.userConfigCache.put(blocklistFlag, r);
+          // TODO: blocklistFlag is not normalized, ie b32 used for dot isn't
+          // converted to its b64 form (which doh and rethinkdns modules use)
+          // example, b32: 1-AABABAA / equivalent b64: 1:AAIAgA==
+          this.userConfigCache.put(r.userBlocklistFlagUint, r);
         }
       } else {
         this.log.d(ctx.rxid, "cfg cache hit?", r != null, blocklistFlag, r);

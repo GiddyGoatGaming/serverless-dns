@@ -42,10 +42,10 @@ export class UserOp {
     return res;
   }
 
-/**
- * @param {{request: Request, isDnsMsg: Boolean, rxid: string}} ctx
- * @returns {pres.RResp}
- */
+  /**
+   * @param {{request: Request, isDnsMsg: Boolean, rxid: string}} ctx
+   * @returns {pres.RResp}
+   */
   loadUser(ctx) {
     let response = pres.emptyResponse();
 
@@ -85,4 +85,4 @@ export class UserOp {
 
     return response;
   }
-
+}

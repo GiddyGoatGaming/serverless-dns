@@ -10,6 +10,7 @@ import * as pres from "../plugin-response.js";
 import * as util from "../../commons/util.js";
 import * as rdnsutil from "../rdns-util.js";
 import * as token from "./auth-token.js";
+import * as bufutil from "../../commons/bufutil.js";
 
 // TODO: determine an approp cache-size
 const cacheSize = 20000;
@@ -66,7 +67,7 @@ export class UserOp {
       if (!util.emptyString(blocklistFlag) && util.emptyObj(r)) {
         r = rdnsutil.unstamp(blocklistFlag);
 
-        if (!util.empty(r.userBlocklistFlagUint)) {
+        if (!bufutil.emptyBuf(r.userBlocklistFlagUint)) {
           this.log.d(ctx.rxid, "new cfg cache kv", blocklistFlag, r);
           // TODO: blocklistFlag is not normalized, ie b32 used for dot isn't
           // converted to its b64 form (which doh and rethinkdns modules use)

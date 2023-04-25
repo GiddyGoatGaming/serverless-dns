@@ -35,12 +35,6 @@ protocol = "tcp"
   [[services.ports]]
   port = 8080
 
-  [[services.tcp_checks]]
-  grace_period = "10s"
-  interval = "15s"
-  restart_limit = 3
-  timeout = "3s"
-
 # DNS over TCP/TLS
 [[services]]
 internal_port = 10000
@@ -57,12 +51,6 @@ protocol = "tcp"
   [[services.ports]]
   port = 10000
 
-  [[services.tcp_checks]]
-  grace_period = "10s"
-  interval = "15s"
-  restart_limit = 3
-  timeout = "3s"
-
 # community.fly.io/t/5490/3
 [checks]
   [checks.up]
@@ -71,6 +59,5 @@ protocol = "tcp"
     method = "get"
     path = "/check"
     port = 8888
-    timeout = "10s"
+    timeout = "3s"
     type = "http"
-

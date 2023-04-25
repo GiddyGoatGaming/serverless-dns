@@ -370,14 +370,14 @@ export function base64ToUintV0(b64Flag) {
 
 export function base64ToUintV1(b64Flag) {
   if (!b64Flag) {
-    throw new Error('b64Flag is empty');
+    throw new Error("b64Flag is empty");
   }
   return bufutil.base64ToUint16(b64Flag);
 }
 
 export function base32ToUintV1(flag) {
   if (!flag) {
-    throw new Error('Flag is empty');
+    throw new Error("b32Flag is empty");
   }
   const b32 = decodeURI(flag);
   return bufutil.decodeFromBinaryArray(rbase32(b32));

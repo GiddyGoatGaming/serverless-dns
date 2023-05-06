@@ -41,7 +41,7 @@
     "@fastly/js-compute": "^1.0.1"
   },
   "devDependencies": {
-    "@types/node": "^18.14.0",
+    "@types/node": "^20.1.0",
     "buffer": "^6.0.3",
     "clinic": "^12.1.0",
     "eslint": "^8.5.0",

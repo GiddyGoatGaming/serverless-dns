@@ -111,12 +111,12 @@ const defaults = new Map(
     // primary doh upstream
     CF_DNS_RESOLVER_URL: {
       type: "string",
-      default: "https://cloudflare-dns.com/dns-query",
+      default: "h3://security.cloudflare-dns.com/dns-query",
     },
     // secondary doh upstream
     CF_DNS_RESOLVER_URL_2: {
       type: "string",
-      default: "https://dns.google/dns-query",
+      default: "h3://freedns.controld.com/no-malware-typo-drugs",
     },
     // upstream recursive rethinkdns resolver running on Fly.io
     MAX_DNS_RESOLVER_URL: {
@@ -138,7 +138,7 @@ const defaults = new Map(
     // ttl for dns answers, overrides ttls in dns answers
     CACHE_TTL: {
       type: "number",
-      default: "1800", // 30m
+      default: "86400", // 1d
     },
     // disable downloading blocklists altogether
     DISABLE_BLOCKLISTS: {

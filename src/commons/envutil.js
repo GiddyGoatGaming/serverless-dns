@@ -54,6 +54,12 @@ export function hasHttpCache() {
   return isWorkers();
 }
 
+export function isBun() {
+  if (!envManager) return false;
+
+  return envManager.r() === "bun";
+}
+
 export function isWorkers() {
   if (!envManager) return false;
 
@@ -187,7 +193,7 @@ export function isCleartext() {
 export function tcpBacklog() {
   if (!envManager) return 100;
 
-  return envManager.get("TCP_BACKLOG") || 100;
+  return envManager.get("TCP_BACKLOG") || 200;
 }
 
 // don't forget to update the fly.toml too
@@ -302,16 +308,6 @@ export function forceDoh() {
   return envManager.get("NODE_DOH_ONLY") || false;
 }
 
-export function avoidFetch() {
-  if (!envManager) return false;
-
-  // on other runtimes, continue using fetch
-  if (!isNode()) return false;
-
-  // on node, default to avoiding fetch
-  return envManager.get("NODE_AVOID_FETCH") || false;
-}
-
 export function disableDnsCache() {
   // disable when profiling dns resolutions
   return profileDnsResolves();
@@ -333,6 +329,7 @@ export function blockSubdomains() {
 }
 
 // recurisve resolver on Fly
+// see: node/config.js#prep
 export function recursive() {
   return onFly();
 }

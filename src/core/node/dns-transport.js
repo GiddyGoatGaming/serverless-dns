@@ -5,13 +5,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import net from "net";
-import dgram from "dgram";
+import net from "node:net";
+import dgram from "node:dgram";
 import * as util from "../../commons/util.js";
 import { TcpConnPool, UdpConnPool } from "../dns/conns.js";
 import { TcpTx, UdpTx } from "../dns/transact.js";
 
-export function makeTransport(host, port, opts = {}) {
+export function makeTransport(host, port = 53, opts = {}) {
   return new Transport(host, port, opts);
 }
 
@@ -24,8 +24,9 @@ export function makeTransport(host, port, opts = {}) {
 // and return non-null dns-answers, if recieved on-time and without errors.
 export class Transport {
   constructor(host, port, opts = {}) {
+    if (util.emptyString(host)) throw new Error("invalid host" + host);
     this.host = host;
-    this.port = port;
+    this.port = port || 53;
     this.connectTimeout = opts.connectTimeout || 3000; // 3s
     this.ioTimeout = opts.ioTimeout || 10000; // 10s
     this.ipproto = net.isIP(host); // 4, 6, or 0

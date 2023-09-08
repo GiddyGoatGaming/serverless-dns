@@ -1,6 +1,8 @@
 app = ""
+
 kill_signal = "SIGINT"
 kill_timeout = "15s"
+swap_size_mb = 152
 
 [build]
   dockerfile = "node.Dockerfile"
@@ -10,9 +12,10 @@ kill_timeout = "15s"
 
 [env]
   CLOUD_PLATFORM = "fly"
+  BUN_ENV = "production"
   DENO_ENV = "production"
-  LOG_LEVEL = "info"
   NODE_ENV = "production"
+  LOG_LEVEL = "info"
 
 # DNS over HTTPS
 [[services]]

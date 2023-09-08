@@ -11,7 +11,7 @@
  * TODO: Remove all side-effects and use a constructor?
  * This module has side effects, sequentially setting up the environment.
  */
-import { atob, btoa } from "buffer";
+import { atob, btoa } from "node:buffer";
 import process from "node:process";
 import * as util from "./util.js";
 import * as blocklists from "./blocklists.js";
@@ -21,6 +21,7 @@ import * as system from "../../system.js";
 import { services, stopAfter } from "../svc.js";
 import EnvManager from "../env.js";
 import * as swap from "../linux/swap.js";
+import * as dnst from "../../core/node/dns-transport.js";
 
 // some of the cjs node globals aren't available in esm
 // nodejs.org/docs/latest/api/globals.html
@@ -96,7 +97,9 @@ async function prep() {
         envManager.get("TLS_CRT_PATH")
       );
       setTlsVars(tlsKey, tlsCrt);
-      log.i("dev (local) tls setup from tls_key_path");
+      const l1 = tlsKey.byteLength;
+      const l2 = tlsCrt.byteLength;
+      log.i("dev (local) tls setup from tls_key_path", l1, l2);
     } catch (ex) {
       // this can happen when running server in BLOCKLIST_DOWNLOAD_ONLY mode
       log.w("Skipping TLS: test TLS crt/key missing; enable TLS offload");
@@ -114,16 +117,22 @@ async function prep() {
     log.i("no atob/btoa polyfill required");
   }
 
-  /** Swap on Fly */
-  if (onFly) {
+  // TODO: move dns* related settings to env
+  // flydns is always ipv6 (fdaa::53)
+  const plainOldDnsIp = onFly ? "fdaa::3" : "1.1.1.2";
+  let dns53 = null;
+  /** swap space and recursive resolver on Fly */
+  if (onFly || true) {
     const ok = swap.mkswap();
     log.i("mkswap done?", ok);
+    dns53 = dnst.makeTransport(plainOldDnsIp);
+    log.i("imported udp/tcp dns transport", plainOldDnsIp);
   } else {
     log.i("no swap required");
   }
 
   /** signal ready */
-  system.pub("ready");
+  system.pub("ready", [dns53]);
 }
 
 function setTlsVars(tlsKey, tlsCrt) {

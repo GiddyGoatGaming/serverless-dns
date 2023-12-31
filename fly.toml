@@ -33,7 +33,7 @@ swap_size_mb = 152
   [services.concurrency]
     type = "connections"
     hard_limit = 775
-    soft_limit = 700
+    soft_limit = 600
 
   [[services.tcp_checks]]
     # super aggressive interval and timeout because
@@ -62,7 +62,7 @@ swap_size_mb = 152
   [services.concurrency]
     type = "connections"
     hard_limit = 775
-    soft_limit = 700
+    soft_limit = 600
 
   [[services.tcp_checks]]
     # super aggressive interval and timeout because

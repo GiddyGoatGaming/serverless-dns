@@ -191,14 +191,14 @@ export function isCleartext() {
 
 // sysctl get net.ipv4.tcp_syn_backlog
 export function tcpBacklog() {
-  if (!envManager) return 100;
+  if (!envManager) return 600; // same as fly.service soft_limit
 
-  return envManager.get("TCP_BACKLOG") || 200;
+  return envManager.get("TCP_BACKLOG") || 600;
 }
 
 // don't forget to update the fly.toml too
 export function maxconns() {
-  if (!envManager) return 1000;
+  if (!envManager) return 1000; // 25% higher than fly.service hard_limit
 
   return envManager.get("MAXCONNS") || 1000;
 }
